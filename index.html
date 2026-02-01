@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modelos Científicos</title>
+
+  <style>
+    /* ===============================
+       RESET E BASE TIPOGRÁFICA
+       =============================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Georgia", "Times New Roman", serif;
+      background: #02040a;
+      color: #e6e6e6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===============================
+       CANVAS DE FUNDO
+       =============================== */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    /* ===============================
+       CONTAINER PRINCIPAL
+       =============================== */
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ===============================
+       TÍTULO
+       =============================== */
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .subtitle {
+      max-width: 700px;
+      font-size: 1rem;
+      line-height: 1.6;
+      opacity: 0.8;
+      margin-bottom: 3rem;
+    }
+
+    /* ===============================
+       GRID DE BOTÕES
+       =============================== */
+    .models-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .model-button {
+      padding: 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.4);
+      color: #ffffff;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(6px);
+      text-decoration: none;
+    }
+
+    .model-button:hover {
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-4px);
+    }
+
+    .model-button:active {
+      transform: translateY(0);
+    }
+
+    /* ===============================
+       RESPONSIVIDADE FINA
+       =============================== */
+    @media (max-width: 600px) {
+      .subtitle {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="space"></canvas>
+
+  <main class="container">
+    <h1>MODELOS CIENTÍFICOS</h1>
+
+    <p class="subtitle">
+      Representações conceituais da realidade física. Ferramentas intelectuais que,
+      como ensinou Einstein, não são a verdade em si, mas aproximações rigorosas do
+      comportamento do universo.
+    </p>
+
+    <section class="models-grid">
+      <a href="/mecanica.html" class="model-button">MODELO 1</a>
+      <a href="/relatividade.html" class="model-button">MODELO 2</a>
+      <button class="model-button">MODELO 3</button>
+      <button class="model-button">MODELO 4</button>
+      <button class="model-button">MODELO 5</button>
+      <button class="model-button">MODELO 6</button>
+    </section>
+  </main>
+  <script>
+    /* ===============================
+       BACKGROUND CÓSMICO EM CANVAS
+       =============================== */
+    const canvas = document.getElementById("space");
+    const ctx = canvas.getContext("2d");
+
+    let stars = [];
+    const STAR_COUNT = 200;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5,
+          speed: Math.random() * 0.2 + 0.05
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        star.y += star.speed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      });
+
+      requestAnimationFrame(drawStars);
+    }
+
+    createStars();
+    drawStars();
+
+    /* ===============================
+       PLACEHOLDER DE INTERAÇÃO
+       =============================== */
+    document.querySelectorAll(".model-button").forEach(button => {
+      button.addEventListener("click", () => {
+        console.log(`Interação futura: ${button.innerText}`);
+      });
+    });
+  </script>
+</body>
+</html>
