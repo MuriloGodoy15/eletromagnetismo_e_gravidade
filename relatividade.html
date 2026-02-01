@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Curvatura do Espaço-Tempo – Campo Fraco</title>
+
+<style>
+body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: #111;
+    color: #ddd;
+    font-family: Arial, sans-serif;
+}
+
+#controls {
+    width: 260px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-right: 1px solid #333;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+}
+
+canvas {
+    flex: 1;
+}
+</style>
+</head>
+
+<body>
+
+<div id="controls">
+    <h3>Parâmetros físicos</h3>
+
+    <label>Massa
+        <input type="range" id="mass" min="50" max="800" value="300">
+    </label>
+
+    <label>Escala da curvatura
+        <input type="range" id="scale" min="30" max="300" value="140">
+    </label>
+
+    <p>Clique para adicionar corpos.</p>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+// ========================
+// Canvas
+// ========================
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = window.innerWidth - 260;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// ========================
+// Constantes físicas (reescaladas)
+// ========================
+const G = 0.6;
+const dt = 0.1;
+
+// ========================
+// Corpos massivos
+// ========================
+let bodies = [];
+
+// ========================
+// Controles
+// ========================
+const massSlider = document.getElementById("mass");
+const scaleSlider = document.getElementById("scale");
+
+// ========================
+// Dinâmica gravitacional
+// ========================
+function updatePhysics() {
+    for (let i = 0; i < bodies.length; i++) {
+        let ax = 0;
+        let ay = 0;
+
+        for (let j = 0; j < bodies.length; j++) {
+            if (i === j) continue;
+
+            const dx = bodies[j].x - bodies[i].x;
+            const dy = bodies[j].y - bodies[i].y;
+            const r2 = dx*dx + dy*dy + 36;
+            const r = Math.sqrt(r2);
+
+            const a = G * bodies[j].m / r2;
+            ax += a * dx / r;
+            ay += a * dy / r;
+        }
+
+        bodies[i].vx += ax * dt;
+        bodies[i].vy += ay * dt;
+    }
+
+    for (let b of bodies) {
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+    }
+}
+
+// ========================
+// Potencial gravitacional
+// ========================
+function potential(x, y) {
+    let phi = 0;
+    for (let b of bodies) {
+        const dx = x - b.x;
+        const dy = y - b.y;
+        const r = Math.sqrt(dx*dx + dy*dy) + 12;
+        phi -= G * b.m / r;
+    }
+    return phi;
+}
+
+// ========================
+// Renderização da malha (corrigida)
+// ========================
+function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const step = 30;
+    const scale = scaleSlider.value;
+    const alpha = 0.25;
+    const beta = 0.4;
+
+    ctx.strokeStyle = "#555";
+    ctx.lineWidth = 1;
+
+    function project(x, y, z) {
+        return {
+            x: x + alpha * z,
+            y: y - beta * z
+        };
+    }
+
+    // linhas verticais
+    for (let x = 0; x < canvas.width; x += step) {
+        ctx.beginPath();
+        let first = true;
+
+        for (let y = 0; y < canvas.height; y += step) {
+            const phi = potential(x, y);
+            const z = -Math.log(1 + Math.abs(phi)) * scale;
+            const p = project(x, y, z);
+
+            if (first) {
+                ctx.moveTo(p.x, p.y);
+                first = false;
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        }
+        ctx.stroke();
+    }
+
+    // linhas horizontais
+    for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        let first = true;
+
+        for (let x = 0; x < canvas.width; x += step) {
+            const phi = potential(x, y);
+            const z = -Math.log(1 + Math.abs(phi)) * scale;
+            const p = project(x, y, z);
+
+            if (first) {
+                ctx.moveTo(p.x, p.y);
+                first = false;
+            } else {
+                ctx.lineTo(p.x, p.y);
+            }
+        }
+        ctx.stroke();
+    }
+
+    // corpos
+    for (let b of bodies) {
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+// ========================
+// Interação
+// ========================
+canvas.addEventListener("click", e => {
+    const rect = canvas.getBoundingClientRect();
+    bodies.push({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        vx: 0,
+        vy: 0,
+        m: parseFloat(massSlider.value)
+    });
+});
+
+// ========================
+// Loop principal
+// ========================
+function loop() {
+    updatePhysics();
+    drawGrid();
+    requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+</body>
+</html>
