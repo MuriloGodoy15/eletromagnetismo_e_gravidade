@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Créditos</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body {
+  background: black;
+  color: #eaeaea;
+  overflow: hidden;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.credits {
+  max-width: 720px;
+  margin: auto;
+  padding: 120px 24px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  letter-spacing: 0.2rem;
+  margin-bottom: 60px;
+  opacity: 0.85;
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.75;
+  opacity: 0.85;
+  margin-bottom: 24px;
+}
+
+a {
+  display: inline-block;
+  margin-top: 40px;
+  color: #9bbcff;
+  text-decoration: none;
+  font-weight: 500;
+  letter-spacing: 0.05rem;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="spacetime"></canvas>
+
+<section class="credits">
+  <h1>Créditos</h1>
+
+  <h2>Murilo Garcia Godoy</h2>
+
+  <p>
+    Estudante e pesquisador independente com profundo interesse em física teórica e
+    astrofísica, orientado pela investigação dos fundamentos matemáticos da natureza.
+    Atua de forma autodidata no desenvolvimento de projetos científicos e educacionais
+    que unem computação, visualização e pensamento físico rigoroso.
+  </p>
+
+  <p>
+    Possui formação sólida em computação e segurança da informação, utilizando a
+    programação como instrumento epistemológico para explorar modelos físicos,
+    simulações conceituais e representações abstratas do espaço-tempo. Sua abordagem
+    reflete o método científico clássico, marcado pela clareza, pela crítica racional
+    e pela recusa de simplificações superficiais.
+  </p>
+
+  <p>
+    Inspirado por pensadores como Newton, Einstein, Dirac e Feynman, compreende a
+    ciência como um empreendimento coletivo e histórico, orientado não pela autoridade,
+    mas pela coerência lógica, pela observação e pela capacidade de explicar o real
+    com elegância.
+  </p>
+
+  <a href="https://www.linkedin.com/in/murilo-garcia-godoy-a494bb235/" target="_blank">
+    LinkedIn
+  </a>
+</section>
+
+<script>
+const canvas = document.getElementById("spacetime");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+let t = 0;
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // Disco de acreção
+  for (let i = 0; i < 420; i++) {
+    const angle = i * 0.03 + t * 0.15;
+    const radius = 120 + Math.sin(i * 0.08 + t) * 35;
+
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius * 0.35;
+
+    const brightness = 0.08 + 0.04 * Math.sin(angle + t);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(160,190,255,${brightness})`;
+    ctx.fill();
+  }
+
+  // Lente gravitacional
+  const lens = ctx.createRadialGradient(cx, cy, 40, cx, cy, 260);
+  lens.addColorStop(0, "rgba(0,0,0,1)");
+  lens.addColorStop(0.35, "rgba(0,0,0,0.85)");
+  lens.addColorStop(0.6, "rgba(20,30,60,0.15)");
+  lens.addColorStop(1, "rgba(0,0,0,0)");
+
+  ctx.fillStyle = lens;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Horizonte de eventos
+  ctx.beginPath();
+  ctx.arc(cx, cy, 42, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(0,0,0,1)";
+  ctx.fill();
+
+  t += 0.004;
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+
+
+</body>
+</html>

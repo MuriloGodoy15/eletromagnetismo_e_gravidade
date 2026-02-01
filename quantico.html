@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Modelo 3 – Mecânica Quântica</title>
+
+<style>
+body {
+    margin: 0;
+    background: #0b0b0f;
+    color: #eaeaea;
+    font-family: "Georgia", "Times New Roman", serif;
+}
+
+header {
+    padding: 18px;
+    text-align: center;
+    border-bottom: 1px solid #222;
+}
+
+header h1 {
+    margin: 0;
+    font-weight: normal;
+    letter-spacing: 1px;
+}
+
+header p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    padding: 14px;
+    border-bottom: 1px solid #222;
+    background: #111;
+}
+
+label {
+    font-size: 13px;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    background: #0f0f14;
+    border-bottom: 1px solid #222;
+}
+
+.section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.section h2 {
+    font-size: 16px;
+    font-weight: normal;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+}
+
+.math {
+    font-family: Consolas, monospace;
+    background: #101018;
+    padding: 10px;
+    margin: 10px 0;
+    border-left: 3px solid #4aa3ff;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>MODELO III — MECÂNICA QUÂNTICA</h1>
+    <p>Descrição não relativística baseada exclusivamente na função de onda</p>
+</header>
+
+<div class="controls">
+    <label>
+        Largura inicial do pacote (σ)
+        <input type="range" id="sigma" min="6" max="40" value="16">
+    </label>
+
+    <label>
+        Potencial externo
+        <select id="potential">
+            <option value="free">Sistema livre</option>
+            <option value="barrier">Barreira de potencial</option>
+            <option value="well">Poço de potencial</option>
+        </select>
+    </label>
+</div>
+
+<canvas id="canvas" width="900" height="420"></canvas>
+
+<section class="section">
+<h2>Equação fundamental</h2>
+
+<p>
+O sistema é descrito pela equação de Schrödinger dependente do tempo em uma dimensão espacial:
+</p>
+
+<div class="math">
+i ∂ψ(x,t)/∂t = − (1/2) ∂²ψ(x,t)/∂x² + V(x) ψ(x,t)
+</div>
+
+<p>
+Adota-se o sistema de unidades reduzidas ℏ = 1 e m = 1. Essa escolha não implica perda de generalidade
+e é padrão em mecânica quântica teórica, pois evidencia a estrutura matemática da dinâmica quântica,
+eliminando constantes físicas acessórias.
+</p>
+</section>
+
+<section class="section">
+<h2>Formalismo físico</h2>
+
+<p>
+Neste modelo, a função de onda ψ(x,t) é a única entidade dinâmica do sistema.
+Não se introduz qualquer noção de partícula pontual, trajetória definida ou posição clássica.
+</p>
+
+<p>
+A quantidade fisicamente interpretável é a densidade de probabilidade
+</p>
+
+<div class="math">
+ρ(x,t) = |ψ(x,t)|²
+</div>
+
+<p>
+que fornece a distribuição espacial das probabilidades de detecção associadas ao estado quântico.
+As partes real e imaginária de ψ são grandezas matemáticas auxiliares, necessárias para a evolução temporal,
+mas não observáveis diretamente.
+</p>
+</section>
+
+<section class="section">
+<h2>Evolução temporal e ruptura com a mecânica clássica</h2>
+
+<p>
+Mesmo na ausência de potencial externo, o pacote de onda sofre espalhamento ao longo do tempo.
+Esse comportamento não admite interpretação clássica em termos de força ou aceleração,
+sendo consequência direta da natureza ondulatória do estado quântico.
+</p>
+
+<p>
+O modelo demonstra explicitamente que a teoria não prevê a posição de um objeto físico,
+mas apenas distribuições de probabilidade associadas a resultados de medições.
+Não existe, no código ou no formalismo, qualquer trajetória oculta subjacente.
+</p>
+</section>
+
+<section class="section">
+<h2>Modelo numérico e limitações</h2>
+
+<p>
+A equação de Schrödinger é resolvida numericamente por discretização do espaço e do tempo,
+utilizando diferenças finitas de segunda ordem para o operador laplaciano.
+O método empregado é conceitualmente simples e adequado para fins educacionais.
+</p>
+
+<p>
+Não são modelados processos de medição, colapso da função de onda, decoerência ambiental,
+efeitos relativísticos ou graus de liberdade internos como spin.
+O modelo representa exclusivamente a evolução unitária de um sistema quântico isolado.
+</p>
+</section>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const N = 500;
+const dx = 0.1;
+const dt = 0.004;
+
+let psiRe = new Array(N);
+let psiIm = new Array(N);
+let V = new Array(N);
+
+function initWave(sigma) {
+    for (let i = 0; i < N; i++) {
+        const x = (i - N/2) * dx;
+        psiRe[i] = Math.exp(-x*x/(2*sigma*sigma));
+        psiIm[i] = 0;
+    }
+    normalize();
+}
+
+function normalize() {
+    let sum = 0;
+    for (let i = 0; i < N; i++) {
+        sum += psiRe[i]*psiRe[i] + psiIm[i]*psiIm[i];
+    }
+    const norm = Math.sqrt(sum * dx);
+    for (let i = 0; i < N; i++) {
+        psiRe[i] /= norm;
+        psiIm[i] /= norm;
+    }
+}
+
+function updatePotential(type) {
+    V.fill(0);
+    if (type === "barrier") {
+        for (let i = N/2 - 6; i < N/2 + 6; i++) V[i] = 6;
+    }
+    if (type === "well") {
+        for (let i = N/2 - 25; i < N/2 + 25; i++) V[i] = -6;
+    }
+}
+
+function step() {
+    const re = psiRe.slice();
+    const im = psiIm.slice();
+
+    for (let i = 1; i < N-1; i++) {
+        const lapRe = (psiRe[i+1] - 2*psiRe[i] + psiRe[i-1])/(dx*dx);
+        const lapIm = (psiIm[i+1] - 2*psiIm[i] + psiIm[i-1])/(dx*dx);
+
+        re[i] += dt * (-0.5*lapIm + V[i]*psiIm[i]);
+        im[i] -= dt * (-0.5*lapRe + V[i]*psiRe[i]);
+    }
+
+    psiRe = re;
+    psiIm = im;
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const sx = canvas.width / N;
+
+    ctx.strokeStyle = "#4aa3ff";
+    ctx.beginPath();
+    for (let i=0;i<N;i++) ctx.lineTo(i*sx, 200 - psiRe[i]*120);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ff7777";
+    ctx.beginPath();
+    for (let i=0;i<N;i++) ctx.lineTo(i*sx, 200 - psiIm[i]*120);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.beginPath();
+    for (let i=0;i<N;i++) {
+        const p = psiRe[i]*psiRe[i] + psiIm[i]*psiIm[i];
+        ctx.lineTo(i*sx, 400 - p*350);
+    }
+    ctx.stroke();
+}
+
+function loop() {
+    step();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+initWave(document.getElementById("sigma").value);
+updatePotential("free");
+
+document.getElementById("sigma").oninput = e => initWave(e.target.value);
+document.getElementById("potential").onchange = e => updatePotential(e.target.value);
+
+loop();
+</script>
+
+</body>
+</html>
