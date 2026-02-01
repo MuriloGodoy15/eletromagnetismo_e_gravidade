@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Inverso do Quadrado</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0f;
+      color: #eaeaea;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    canvas {
+      background: #111;
+      margin-top: 20px;
+      border: 1px solid #333;
+    }
+
+    .info {
+      max-width: 700px;
+      margin: 10px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+<div class="info">
+  <strong>Modelo 1</strong>: Diluição geométrica de um campo gerado por fonte pontual.
+</div>
+<canvas id="fieldCanvas" width="500" height="400"></canvas>
+
+<div class="info">
+  <strong>Modelo 2</strong>: Órbita newtoniana sob lei do inverso do quadrado.
+</div>
+<canvas id="gravityCanvas" width="500" height="400"></canvas>
+
+<script>
+  const fieldCanvas = document.getElementById("fieldCanvas");
+  const fctx = fieldCanvas.getContext("2d");
+
+  const fx = fieldCanvas.width / 2;
+  const fy = fieldCanvas.height / 2;
+  let t = 0;
+
+  function fieldLoop() {
+    fctx.clearRect(0, 0, fieldCanvas.width, fieldCanvas.height);
+
+    fctx.beginPath();
+    fctx.arc(fx, fy, 5, 0, Math.PI * 2);
+    fctx.fillStyle = "#fff";
+    fctx.fill();
+
+    for (let i = 1; i <= 8; i++) {
+      const r = i * 25 + (t % 25);
+      const a = Math.min(1, 7000 / (r * r));
+
+      fctx.beginPath();
+      fctx.arc(fx, fy, r, 0, Math.PI * 2);
+      fctx.strokeStyle = `rgba(0,160,255,${a})`;
+      fctx.lineWidth = 2;
+      fctx.stroke();
+    }
+
+    t += 0.5;
+    requestAnimationFrame(fieldLoop);
+  }
+
+  fieldLoop();
+
+  const gravityCanvas = document.getElementById("gravityCanvas");
+  const gctx = gravityCanvas.getContext("2d");
+
+  const G = 1;
+  const dt = 0.05;
+
+  const M = 2000;
+  const m = 1;
+  const r0 = 120;
+  const v0 = Math.sqrt(G * M / r0);
+
+  const cx = gravityCanvas.width / 2;
+  const cy = gravityCanvas.height / 2;
+
+  const earth = {
+    x: cx,
+    y: cy,
+    vx: 0,
+    vy: 0,
+    r: 14
+  };
+
+  const moon = {
+    x: cx + r0,
+    y: cy,
+    vx: 0,
+    vy: -v0,
+    r: 5
+  };
+
+  function gravityStep() {
+    const dx = moon.x - earth.x;
+    const dy = moon.y - earth.y;
+    const r = Math.sqrt(dx * dx + dy * dy);
+
+    const a = G * M / (r * r);
+    moon.vx -= a * dx / r * dt;
+    moon.vy -= a * dy / r * dt;
+
+    moon.x += moon.vx * dt;
+    moon.y += moon.vy * dt;
+  }
+
+  function gravityLoop() {
+    gctx.clearRect(0, 0, gravityCanvas.width, gravityCanvas.height);
+
+    gravityStep();
+
+    gctx.beginPath();
+    gctx.moveTo(earth.x, earth.y);
+    gctx.lineTo(moon.x, moon.y);
+    gctx.strokeStyle = "rgba(255,255,255,0.1)";
+    gctx.stroke();
+
+    gctx.beginPath();
+    gctx.arc(earth.x, earth.y, earth.r, 0, Math.PI * 2);
+    gctx.fillStyle = "#2a7fff";
+    gctx.fill();
+
+    gctx.beginPath();
+    gctx.arc(moon.x, moon.y, moon.r, 0, Math.PI * 2);
+    gctx.fillStyle = "#ccc";
+    gctx.fill();
+
+    requestAnimationFrame(gravityLoop);
+  }
+
+  gravityLoop();
+</script>
+
+</body>
+</html>
